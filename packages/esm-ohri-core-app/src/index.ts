@@ -47,7 +47,7 @@ function setupOpenMRS() {
     extensions: [
       {
         id: 'home-dashboard-ext',
-        slot: 'dashboard-links-slot',
+        slot: 'global-nav-menu-slot',
         load: getSyncLifecycle(createOHRIDashboardLink(homeDashboardMeta), options),
         meta: homeDashboardMeta,
         online: true,
@@ -66,7 +66,7 @@ function setupOpenMRS() {
       },
       {
         id: 'appointments-ohri-dashboard-ext',
-        slot: 'dashboard-links-slot',
+        slot: 'global-nav-menu-slot',
         load: getSyncLifecycle(createOHRIDashboardLink(appointmentsDashboardMeta), options),
         meta: appointmentsDashboardMeta,
         online: true,
@@ -85,7 +85,7 @@ function setupOpenMRS() {
       },
       {
         id: 'dispensing-ohri-dashboard-ext',
-        slot: 'dashboard-links-slot',
+        slot: 'global-nav-menu-slot',
         load: getSyncLifecycle(createOHRIDashboardLink(dispensingDashboardMeta), options),
         meta: dispensingDashboardMeta,
         online: true,
@@ -104,7 +104,7 @@ function setupOpenMRS() {
       },
       {
         id: 'service-queues-ohri-dashboard-ext',
-        slot: 'dashboard-links-slot',
+        slot: 'global-nav-menu-slot',
         load: getSyncLifecycle(createOHRIDashboardLink(serviceQueuesDashboardMeta), options),
         meta: serviceQueuesDashboardMeta,
         online: true,
@@ -124,7 +124,7 @@ function setupOpenMRS() {
       {
         id: 'ohri-nav-items-ext',
         slot: 'ohri-nav-items-slot',
-        load: getAsyncLifecycle(() => import('./ohri-dashboard/side-menu/ohri-dashboard-side-nav.component'), {
+        load: getAsyncLifecycle(() => import('./ohri-dashboard/side-menu/ohri-home.component'), {
           featureName: 'nav-items',
           moduleName,
         }),
