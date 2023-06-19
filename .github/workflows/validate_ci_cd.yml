@@ -3,10 +3,11 @@ name: Validation OHRI CI
 on:
   push: 
     branches:
-      - microfrontends
+      - mfe_ci_cd
+      - dev
 
 jobs:
-  build:
+  validate_ci:
     runs-on: ubuntu-latest
 
     steps: 
@@ -21,7 +22,67 @@ jobs:
           echo " port: ${{ secrets.HISTAC_NAMIBIA_PORT }} "
           echo " host: ${{ secrets.HISTAC_DEV_NAMIBIA_HOST }} "
           echo "  port: ${{ secrets.HISTAC_DEV_NAMIBIA_PORT }}"
-          echo "  "
+          echo "  key: ${{ secrets.HISTAC_OHRI_KEY}} "
           echo "  " 
           echo "  "
           echo "  "   
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+      - name: Run build
+        run: yarn build
+
+  update_config:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.ref == 'refs/heads/dev' }}
+
+    steps:
+      - name: Checkout repo to make config folder local
+        uses: actions/checkout@v3
+        with:
+          ref: dev
+      - run: ls -la .github/
+
+      - name: Copy Branch Dev Import Map to remote
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          source: configuration/deploy_docs.sh
+          target: /opt/frontend_modules/
+          host: ${{ secrets.HISTAC_DEV_NAMIBIA_HOST }}
+          username: ${{ secrets.HISTAC_USERNAME }}
+          key: ${{ secrets.HISTAC_OHRI_KEY}}
+          port: ${{ secrets.HISTAC_NAMIBIA_PORT }}
+
+  docs_deployment:
+    runs-on: ubuntu-latest
+    needs: update_config
+    if: ${{ github.ref == 'refs/heads/dev' }}
+
+    steps:
+      # Update the Microfrontends to reflect what we have in the working branch
+      - name: Compute Timestamp
+        run: echo "TIMESTAMP=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+      - uses: garygrossgarten/github-action-ssh@release
+        name: BackUp and Run the Update DOCS Site Script
+        with:
+          command: cd /opt/frontend_modules/.github && sh deploy_namibia.sh
+          host: ${{ secrets.HISTAC_DEV_NAMIBIA_HOST }}
+          username: ${{ secrets.HISTAC_USERNAME }}
+          privateKey: ${{ secrets.HISTAC_KEY}}
+
+          port: ${{ secrets.HISTAC_NAMIBIA_PORT }}
