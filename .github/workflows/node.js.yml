@@ -16,6 +16,16 @@ on:
       - created
 
 jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          package-manager: yarn
+          test-script: yarn jest
+
+
   build:
     runs-on: ubuntu-latest
 
@@ -23,8 +33,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Use Node.js
         uses: actions/setup-node@v3
-        with:
-          node-version: '16'
 
       - name: Cache dependencies
         id: cache
@@ -37,12 +45,20 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install --immutable
 
-      - name: Run tests
-        run: yarn run test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
 
-      # Temporarily disable typecheck
-      # - name: Run lint and typecheck
-      #   run: yarn turbo run lint typescript --color --api="http://127.0.0.1:9080" --token="${{ secrets.TURBO_SERVER_TOKEN }}" --team="${{ github.repository_owner }}"
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Run Coverage
+        run: yarn coverage
+
+        # Temporarily disable typecheck
+        # - name: Run lint and typecheck
+        #   run: yarn turbo run lint typescript --color --api="http://127.0.0.1:9080" --token="${{ secrets.TURBO_SERVER_TOKEN }}" --team="${{ github.repository_owner }}"
 
       - name: Run build
         run: yarn turbo run build --color --concurrency=5 --api="http://127.0.0.1:9080" --token="${{ secrets.TURBO_SERVER_TOKEN }}" --team="${{ github.repository_owner }}"
@@ -78,6 +94,9 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install --immutable
+
+      - name: Run tests
+        run: yarn test
 
       - run: yarn lerna version "$(node -e "console.log(require('./lerna.json').version)")-pre.${{ github.run_number }}" --no-git-tag-version --yes
 
@@ -199,10 +218,13 @@ jobs:
         with:
             command: who && which node && cd /opt/frontend_modules && /bin/bash update_microfrontends.sh
             host: ${{ secrets.HISTAC_DEV_NAMIBIA_HOST }}
-            username: ${{ secrets.HISTAC_USERNAME }}
-            privateKey: ${{ secrets.HISTAC_KEY}}
-
+            username: ${{ secrets.HISTAC_DEV_NAMIBIA_USERNAME }}
+            privateKey: ${{ secrets.HISTAC_DEV_NAMIBIA_KEY}}
             port: ${{ secrets.HISTAC_DEV_NAMIBIA_PORT }}
+
+            proxy_host: ${{ secrets.HISTAC_DEV_NAMIBIA_PROXY_HOST }}
+            proxy_username: ${{ secrets.HISTAC_DEV_NAMIBIA_USERNAME }}
+            proxy_port: ${{ secrets.HISTAC_DEV_NAMIBIA_PROXY_PORT }}
 
   pre_demo:
     runs-on: ubuntu-latest
