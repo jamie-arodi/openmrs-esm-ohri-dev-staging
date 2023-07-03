@@ -131,4 +131,5 @@ div[class*='-esm-patient-vitals__vitals-header__row'] {
 
 div[class*='-esm-patient-chart__patient-chart__chartReview'] {
   max-width: 100% !important;
+  overflow-y: auto !important;
 }

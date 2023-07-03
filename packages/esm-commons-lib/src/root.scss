@@ -76,11 +76,7 @@ aside {
    background-color: $ui-02 !important;
 }
 
-// Login Overrides
-
-div[class*='-esm-login__styles__center'] > img {
-  width: 140px; // design has 120px
-}
+// Tab Overrides
 
 :global(.tab-12rem) > button {
   width: 12rem !important;
