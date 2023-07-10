@@ -75,8 +75,8 @@ function FormRenderTest() {
   };
 
   const handleFormValidation = () => {
-    if (defaultJson) {
-      const parsedForm = typeof defaultJson == 'string' ? JSON.parse(defaultJson) : defaultJson;
+    if (schemaInput) {
+      const parsedForm = typeof schemaInput == 'string' ? JSON.parse(schemaInput) : schemaInput;
 
       for (let i = 0; i < parsedForm.pages.length; i++) {
         for (let j = 0; j < parsedForm.pages[i].sections.length; j++) {
@@ -117,7 +117,7 @@ function FormRenderTest() {
                   )} error occurred!`,
                 );
               if (index === 3) {
-                console.log(`❌ Concept UUID ${conceptObject.questionOptions.concept} not found`);
+                console.log(`❌ Concept UUID ${conceptObject.questionOptions.concept} not found:`, conceptObject.id);
               }
             });
           })
@@ -126,12 +126,12 @@ function FormRenderTest() {
 
   const dataTypeChecker = (conceptObject, responseObject) => {
     const renderTypes = {
-      Numeric: ['number'],
-      Coded: ['select', 'checkbox', 'radio', 'toggle', 'content-switcher'],
-      Text: ['text', 'textarea'],
-      Date: ['date'],
-      Datetime: ['datetime'],
-      Boolean: ['toggle', 'select', 'radio', 'content-switcher'],
+      Numeric: ['number', 'fixed-value'],
+      Coded: ['select', 'checkbox', 'radio', 'toggle', 'content-switcher', 'fixed-value'],
+      Text: ['text', 'textarea', 'fixed-value'],
+      Date: ['date', 'fixed-value'],
+      Datetime: ['datetime', 'fixed-value'],
+      Boolean: ['toggle', 'select', 'radio', 'content-switcher', 'fixed-value'],
       Rule: ['repeating', 'group'],
     };
 
@@ -142,6 +142,8 @@ function FormRenderTest() {
     renderTypes.hasOwnProperty(responseObject.data.datatype.display) &&
       !renderTypes[responseObject.data.datatype.display].includes(conceptObject.questionOptions.rendering) &&
       console.log('❌ datatype rendering mismatch');
+
+    console.log(`id: ${conceptObject.id} rendering: ${conceptObject.questionOptions.rendering}`)
   };
 
   const handleFormSubmission = (e) => {
