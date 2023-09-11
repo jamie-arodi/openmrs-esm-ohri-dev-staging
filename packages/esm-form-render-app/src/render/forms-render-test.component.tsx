@@ -8,6 +8,7 @@ import { applyFormIntent, loadSubforms, OHRIForm, OHRIFormSchema } from '@openmr
 import { useTranslation } from 'react-i18next';
 import { ConfigObject, useConfig, openmrsFetch } from '@openmrs/esm-framework';
 import { handleFormValidation } from '../form-validator';
+import { useSchemaValidator } from '../../../esm-commons-lib/src/hooks/useSchemaValidator';
 
 function FormRenderTest() {
   const { t } = useTranslation();
@@ -27,8 +28,11 @@ function FormRenderTest() {
   const jsonUrl = useMemo(() => new URLSearchParams(window.location.search).get('json'), []);
   const [key, setKey] = useState(0);
   const [defaultJson, setDefaultJson] = useState(localStorage.getItem('forms-render-test:draft-form'));
+  const [doValidate, setDoValidate] = useState(false);
   // This is required because of the enforced CORS policy
   const corsProxy = 'ohri-form-render.globalhealthapp.net';
+
+  const { errors, warnings, isLoading } = useSchemaValidator(schemaInput, doValidate);
 
   const availableEditorThemes = [
     'monokai',
@@ -75,12 +79,13 @@ function FormRenderTest() {
     setIsSchemaLoaded(false);
   };
 
-  const formValidation = () => {
-    handleFormValidation(schemaInput, dataTypeToRenderingMap).then((response) => {
-      const [errorsArray, warningsArray] = response;
-      console.log('errors:', errorsArray);
-      console.log('warnings:', warningsArray);
-    });
+  const schemaValidation = () => {
+    setDoValidate((prevState) => !prevState);
+    // handleFormValidation(schemaInput, dataTypeToRenderingMap).then((response) => {
+    //   const [errorsArray, warningsArray] = response;
+    //   console.log('errors:', errorsArray);
+    //   console.log('warnings:', warningsArray);
+    // });
   };
 
   const handleFormSubmission = (e) => {
@@ -137,6 +142,12 @@ function FormRenderTest() {
         });
     }
   }, [jsonUrl]);
+
+  useEffect(() => {
+    if (errors?.length) {
+      console.log(errors, isLoading);
+    }
+  }, [errors, isLoading]);
 
   return (
     <div className={styles.container}>
@@ -212,7 +223,7 @@ function FormRenderTest() {
                       />
                     </div>
 
-                    <Button style={{ marginTop: '1em' }} renderIcon={UserData} onClick={formValidation}>
+                    <Button style={{ marginTop: '1em' }} renderIcon={UserData} onClick={schemaValidation}>
                       Validate Form
                     </Button>
 

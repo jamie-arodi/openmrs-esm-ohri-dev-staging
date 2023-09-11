@@ -20,6 +20,20 @@ export const configSchema = {
       Rule: ['repeating', 'group'],
     },
   },
+
+  conceptDataTypes: {
+    _description: 'An object containing availabe datatypes',
+    _type: Type.Object,
+    _default: {
+      Numeric: 'Numeric',
+      Coded: 'Coded',
+      Text: 'Text',
+      Date: 'Date',
+      Datetime: 'Datetime',
+      Boolean: 'Boolean',
+      Rule: 'Rule',
+    },
+  },
 };
 
 export interface ConfigObject {
